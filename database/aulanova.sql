@@ -1,0 +1,66 @@
+-- Crea y selecciona la base de datos.
+CREATE DATABASE IF NOT EXISTS aulanova_db
+  DEFAULT CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE aulanova_db;
+
+-- Elimina primero las tablas que dependen de otras.
+DROP TABLE IF EXISTS curso_alumnos;
+DROP TABLE IF EXISTS clases;
+DROP TABLE IF EXISTS cursos;
+DROP TABLE IF EXISTS usuarios;
+
+CREATE TABLE usuarios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  email VARCHAR(120) NOT NULL UNIQUE,
+  contrasena VARCHAR(255) NOT NULL,
+  rol ENUM('admin', 'profesor', 'alumno') NOT NULL,
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_modificacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE cursos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(120) NOT NULL,
+  idioma VARCHAR(60) NOT NULL,
+  nivel VARCHAR(30) NOT NULL,
+  profesor_id INT NOT NULL,
+  fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_modificacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_cursos_profesor
+    FOREIGN KEY (profesor_id) REFERENCES usuarios(id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE clases (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  curso_id INT NOT NULL,
+  titulo VARCHAR(150) NOT NULL,
+  fecha DATE NOT NULL,
+  hora TIME NOT NULL,
+  aula VARCHAR(60) NOT NULL,
+  fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_modificacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_clases_curso
+    FOREIGN KEY (curso_id) REFERENCES cursos(id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE curso_alumnos (
+  curso_id INT NOT NULL,
+  alumno_id INT NOT NULL,
+  PRIMARY KEY (curso_id, alumno_id),
+  CONSTRAINT fk_curso_alumnos_curso
+    FOREIGN KEY (curso_id) REFERENCES cursos(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_curso_alumnos_alumno
+    FOREIGN KEY (alumno_id) REFERENCES usuarios(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
