@@ -2,9 +2,13 @@ require('dotenv').config();
 
 const express = require('express');
 const pool = require('./db');
+const authRoutes = require('./src/routes/authRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 8888;
+
+app.use(express.json());
+app.use('/api/auth', authRoutes);
 
 // Endpoint de prueba de la API.
 app.get('/api/test', (req, res) => {
