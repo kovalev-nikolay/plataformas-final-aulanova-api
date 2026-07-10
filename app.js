@@ -1,7 +1,10 @@
+require('dotenv').config();
+
 const express = require('express');
+const pool = require('./db');
 
 const app = express();
-const PORT = 8888;
+const PORT = process.env.PORT || 8888;
 
 // Endpoint de prueba de la API.
 app.get('/api/test', (req, res) => {
@@ -9,6 +12,23 @@ app.get('/api/test', (req, res) => {
     success: true,
     message: 'API de AulaNova funcionando',
   });
+});
+
+// Comprueba la conexión con MySQL.
+app.get('/api/db-test', async (req, res) => {
+  try {
+    await pool.query('SELECT 1 AS result');
+
+    res.json({
+      success: true,
+      message: 'Conexión a MySQL correcta',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error de conexión a MySQL',
+    });
+  }
 });
 
 // Inicia el servidor.
