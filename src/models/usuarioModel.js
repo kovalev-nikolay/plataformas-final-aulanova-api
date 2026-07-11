@@ -33,4 +33,32 @@ async function all() {
   return usuarios;
 }
 
-module.exports = { login, all };
+async function findByEmail(email) {
+  const [usuarios] = await pool.execute(
+    `SELECT id, nombre, email, rol, activo
+     FROM usuarios
+     WHERE email = ?
+     LIMIT 1`,
+    [email],
+  );
+
+  return usuarios[0] || null;
+}
+
+async function create({ nombre, email, contrasena, rol }) {
+  const [resultado] = await pool.execute(
+    `INSERT INTO usuarios (nombre, email, contrasena, rol, activo)
+     VALUES (?, ?, ?, ?, TRUE)`,
+    [nombre, email, contrasena, rol],
+  );
+
+  return {
+    id: resultado.insertId,
+    nombre,
+    email,
+    rol,
+    activo: true,
+  };
+}
+
+module.exports = { login, all, findByEmail, create };

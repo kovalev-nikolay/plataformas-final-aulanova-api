@@ -6,5 +6,6 @@ const router = express.Router();
 
 // Solamente los administradores pueden listar usuarios.
 router.get('/', requireAuth, requireRole('admin'), usuarioController.index);
+router.post('/', requireAuth, requireRole('admin'), usuarioController.store);
 
 module.exports = router;
