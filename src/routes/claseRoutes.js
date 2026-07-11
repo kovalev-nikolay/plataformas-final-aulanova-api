@@ -18,5 +18,11 @@ router.put(
   requireRole('admin', 'profesor'),
   claseController.update,
 );
+router.delete(
+  '/:id',
+  requireAuth,
+  requireRole('admin', 'profesor'),
+  claseController.destroy,
+);
 
 module.exports = router;

@@ -222,4 +222,57 @@ async function update(req, res) {
   }
 }
 
-module.exports = { index, store, update };
+async function destroy(req, res) {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'El id no es válido',
+    });
+  }
+
+  try {
+    const clase = await claseModel.findById(id);
+
+    if (!clase) {
+      return res.status(404).json({
+        success: false,
+        message: 'Clase no encontrada',
+      });
+    }
+
+    const curso = await cursoModel.findById(clase.courseId);
+
+    if (!curso) {
+      return res.status(404).json({
+        success: false,
+        message: 'Curso no encontrado',
+      });
+    }
+
+    if (
+      req.user.rol === 'profesor'
+      && Number(curso.profesorId) !== Number(req.user.id)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'No tenés permisos para eliminar esta clase',
+      });
+    }
+
+    await claseModel.remove(id);
+
+    return res.json({
+      success: true,
+      message: 'Clase eliminada correctamente',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error al eliminar la clase',
+    });
+  }
+}
+
+module.exports = { index, store, update, destroy };

@@ -84,4 +84,8 @@ async function update(id, { courseId, titulo, fecha, hora, aula }) {
   return findById(id);
 }
 
-module.exports = { allByUser, create, findById, update };
+async function remove(id) {
+  await pool.execute('DELETE FROM clases WHERE id = ?', [id]);
+}
+
+module.exports = { allByUser, create, findById, update, remove };
