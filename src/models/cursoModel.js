@@ -44,4 +44,21 @@ async function allByUser(usuario) {
   }));
 }
 
-module.exports = { allByUser };
+async function create({ nombre, idioma, nivel, profesorId }) {
+  const [resultado] = await pool.execute(
+    `INSERT INTO cursos (nombre, idioma, nivel, profesor_id)
+     VALUES (?, ?, ?, ?)`,
+    [nombre, idioma, nivel, profesorId],
+  );
+
+  return {
+    id: resultado.insertId,
+    nombre,
+    idioma,
+    nivel,
+    profesorId,
+    alumnosIds: [],
+  };
+}
+
+module.exports = { allByUser, create };
