@@ -12,5 +12,11 @@ router.post(
   requireRole('admin', 'profesor'),
   claseController.store,
 );
+router.put(
+  '/:id',
+  requireAuth,
+  requireRole('admin', 'profesor'),
+  claseController.update,
+);
 
 module.exports = router;

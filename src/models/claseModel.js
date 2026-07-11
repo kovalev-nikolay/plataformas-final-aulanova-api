@@ -55,4 +55,33 @@ async function create({ courseId, titulo, fecha, hora, aula }) {
   };
 }
 
-module.exports = { allByUser, create };
+async function findById(id) {
+  const [clases] = await pool.execute(
+    `SELECT
+       id,
+       curso_id AS courseId,
+       titulo,
+       DATE_FORMAT(fecha, '%Y-%m-%d') AS fecha,
+       TIME_FORMAT(hora, '%H:%i') AS hora,
+       aula
+     FROM clases
+     WHERE id = ?
+     LIMIT 1`,
+    [id],
+  );
+
+  return clases[0] || null;
+}
+
+async function update(id, { courseId, titulo, fecha, hora, aula }) {
+  await pool.execute(
+    `UPDATE clases
+     SET curso_id = ?, titulo = ?, fecha = ?, hora = ?, aula = ?
+     WHERE id = ?`,
+    [courseId, titulo, fecha, hora, aula, id],
+  );
+
+  return findById(id);
+}
+
+module.exports = { allByUser, create, findById, update };
