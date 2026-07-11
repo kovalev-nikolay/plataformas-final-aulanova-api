@@ -4,6 +4,7 @@ const express = require('express');
 const pool = require('./db');
 const authRoutes = require('./src/routes/authRoutes');
 const usuarioRoutes = require('./src/routes/usuarioRoutes');
+const cursoRoutes = require('./src/routes/cursoRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 8888;
@@ -11,6 +12,7 @@ const PORT = process.env.PORT || 8888;
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usuarioRoutes);
+app.use('/api/courses', cursoRoutes);
 
 // Endpoint de prueba de la API.
 app.get('/api/test', (req, res) => {
