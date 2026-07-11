@@ -22,4 +22,15 @@ async function login({ email, contrasena }) {
   return contrasenaValida ? usuario : null;
 }
 
-module.exports = { login };
+async function all() {
+  // Recupera solamente datos públicos de los usuarios.
+  const [usuarios] = await pool.query(
+    `SELECT id, nombre, email, rol, activo
+     FROM usuarios
+     ORDER BY nombre`,
+  );
+
+  return usuarios;
+}
+
+module.exports = { login, all };

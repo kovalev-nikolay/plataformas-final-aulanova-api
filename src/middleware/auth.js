@@ -24,4 +24,17 @@ function requireAuth(req, res, next) {
   }
 }
 
-module.exports = { requireAuth };
+function requireRole(...rolesPermitidos) {
+  return (req, res, next) => {
+    if (!rolesPermitidos.includes(req.user.rol)) {
+      return res.status(403).json({
+        success: false,
+        message: 'No tenés permisos para realizar esta acción',
+      });
+    }
+
+    return next();
+  };
+}
+
+module.exports = { requireAuth, requireRole };
