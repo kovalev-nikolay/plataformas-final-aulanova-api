@@ -7,5 +7,6 @@ const router = express.Router();
 // Cada rol recibe solamente los cursos que le corresponden.
 router.get('/', requireAuth, cursoController.index);
 router.post('/', requireAuth, requireRole('admin'), cursoController.store);
+router.put('/:id', requireAuth, requireRole('admin'), cursoController.update);
 
 module.exports = router;

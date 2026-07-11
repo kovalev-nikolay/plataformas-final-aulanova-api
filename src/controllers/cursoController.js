@@ -76,4 +76,81 @@ async function store(req, res) {
   }
 }
 
-module.exports = { index, store };
+async function update(req, res) {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'El id no es válido',
+    });
+  }
+
+  const { nombre, idioma, nivel, profesorId } = req.body;
+  const nombreNormalizado = typeof nombre === 'string' ? nombre.trim() : '';
+  const idiomaNormalizado = typeof idioma === 'string' ? idioma.trim() : '';
+  const nivelNormalizado = typeof nivel === 'string' ? nivel.trim() : '';
+
+  if (
+    !nombreNormalizado
+    || !idiomaNormalizado
+    || !nivelNormalizado
+    || profesorId === undefined
+    || profesorId === null
+    || profesorId === ''
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: 'Todos los campos son obligatorios',
+    });
+  }
+
+  const profesorIdNormalizado = Number(profesorId);
+
+  if (!Number.isInteger(profesorIdNormalizado) || profesorIdNormalizado <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'El id del profesor no es válido',
+    });
+  }
+
+  try {
+    const cursoExistente = await cursoModel.findById(id);
+
+    if (!cursoExistente) {
+      return res.status(404).json({
+        success: false,
+        message: 'Curso no encontrado',
+      });
+    }
+
+    const profesor = await usuarioModel.findById(profesorIdNormalizado);
+
+    if (!profesor || profesor.rol !== 'profesor' || !profesor.activo) {
+      return res.status(400).json({
+        success: false,
+        message: 'El profesor no es válido',
+      });
+    }
+
+    const curso = await cursoModel.update(id, {
+      nombre: nombreNormalizado,
+      idioma: idiomaNormalizado,
+      nivel: nivelNormalizado,
+      profesorId: profesorIdNormalizado,
+    });
+
+    return res.json({
+      success: true,
+      message: 'Curso actualizado correctamente',
+      curso,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error al actualizar el curso',
+    });
+  }
+}
+
+module.exports = { index, store, update };
