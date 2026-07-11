@@ -48,4 +48,17 @@ async function login(req, res) {
   }
 }
 
-module.exports = { login };
+function profile(req, res) {
+  // Devuelve los datos incluidos en el token verificado.
+  return res.json({
+    success: true,
+    usuario: {
+      id: req.user.id,
+      nombre: req.user.nombre,
+      email: req.user.email,
+      rol: req.user.rol,
+    },
+  });
+}
+
+module.exports = { login, profile };
