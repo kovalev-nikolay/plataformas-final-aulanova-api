@@ -82,4 +82,86 @@ async function store(req, res) {
   }
 }
 
-module.exports = { index, store };
+async function update(req, res) {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'El id no es válido',
+    });
+  }
+
+  const { nombre, email, rol, activo } = req.body;
+  const emailNormalizado = typeof email === 'string'
+    ? email.trim().toLowerCase()
+    : '';
+
+  if (!nombre || !emailNormalizado || !rol || activo === undefined || activo === null) {
+    return res.status(400).json({
+      success: false,
+      message: 'Todos los campos son obligatorios',
+    });
+  }
+
+  if (typeof activo !== 'boolean') {
+    return res.status(400).json({
+      success: false,
+      message: 'El estado activo no es válido',
+    });
+  }
+
+  if (!['admin', 'profesor', 'alumno'].includes(rol)) {
+    return res.status(400).json({
+      success: false,
+      message: 'El rol no es válido',
+    });
+  }
+
+  try {
+    const usuarioExistente = await usuarioModel.findById(id);
+
+    if (!usuarioExistente) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado',
+      });
+    }
+
+    const usuarioConEmail = await usuarioModel.findByEmail(emailNormalizado);
+
+    if (usuarioConEmail && usuarioConEmail.id !== id) {
+      return res.status(409).json({
+        success: false,
+        message: 'El email ya está registrado',
+      });
+    }
+
+    const usuario = await usuarioModel.update(id, {
+      nombre,
+      email: emailNormalizado,
+      rol,
+      activo,
+    });
+
+    return res.json({
+      success: true,
+      message: 'Usuario actualizado correctamente',
+      usuario,
+    });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({
+        success: false,
+        message: 'El email ya está registrado',
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Error al actualizar el usuario',
+    });
+  }
+}
+
+module.exports = { index, store, update };

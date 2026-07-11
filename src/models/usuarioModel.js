@@ -61,4 +61,32 @@ async function create({ nombre, email, contrasena, rol }) {
   };
 }
 
-module.exports = { login, all, findByEmail, create };
+async function findById(id) {
+  const [usuarios] = await pool.execute(
+    `SELECT id, nombre, email, rol, activo
+     FROM usuarios
+     WHERE id = ?
+     LIMIT 1`,
+    [id],
+  );
+
+  return usuarios[0] || null;
+}
+
+async function update(id, { nombre, email, rol, activo }) {
+  await pool.execute(
+    `UPDATE usuarios
+     SET nombre = ?, email = ?, rol = ?, activo = ?
+     WHERE id = ?`,
+    [nombre, email, rol, activo, id],
+  );
+
+  const usuario = await findById(id);
+
+  return {
+    ...usuario,
+    activo: Boolean(usuario.activo),
+  };
+}
+
+module.exports = { login, all, findByEmail, create, findById, update };
