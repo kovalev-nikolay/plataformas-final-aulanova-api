@@ -38,4 +38,21 @@ async function allByUser(usuario) {
   return clases;
 }
 
-module.exports = { allByUser };
+async function create({ courseId, titulo, fecha, hora, aula }) {
+  const [resultado] = await pool.execute(
+    `INSERT INTO clases (curso_id, titulo, fecha, hora, aula)
+     VALUES (?, ?, ?, ?, ?)`,
+    [courseId, titulo, fecha, hora, aula],
+  );
+
+  return {
+    id: resultado.insertId,
+    courseId,
+    titulo,
+    fecha,
+    hora,
+    aula,
+  };
+}
+
+module.exports = { allByUser, create };
