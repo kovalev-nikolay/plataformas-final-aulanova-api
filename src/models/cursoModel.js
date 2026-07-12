@@ -103,4 +103,17 @@ async function update(id, { nombre, idioma, nivel, profesorId }) {
   return findById(id);
 }
 
-module.exports = { allByUser, create, findById, update };
+async function countClasses(id) {
+  const [resultados] = await pool.execute(
+    'SELECT COUNT(*) AS total FROM clases WHERE curso_id = ?',
+    [id],
+  );
+
+  return Number(resultados[0].total);
+}
+
+async function remove(id) {
+  await pool.execute('DELETE FROM cursos WHERE id = ?', [id]);
+}
+
+module.exports = { allByUser, create, findById, update, countClasses, remove };

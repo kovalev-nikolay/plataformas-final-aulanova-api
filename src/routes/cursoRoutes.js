@@ -8,5 +8,6 @@ const router = express.Router();
 router.get('/', requireAuth, cursoController.index);
 router.post('/', requireAuth, requireRole('admin'), cursoController.store);
 router.put('/:id', requireAuth, requireRole('admin'), cursoController.update);
+router.delete('/:id', requireAuth, requireRole('admin'), cursoController.destroy);
 
 module.exports = router;

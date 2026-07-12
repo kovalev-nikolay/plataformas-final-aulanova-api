@@ -153,4 +153,47 @@ async function update(req, res) {
   }
 }
 
-module.exports = { index, store, update };
+async function destroy(req, res) {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'El id no es válido',
+    });
+  }
+
+  try {
+    const curso = await cursoModel.findById(id);
+
+    if (!curso) {
+      return res.status(404).json({
+        success: false,
+        message: 'Curso no encontrado',
+      });
+    }
+
+    const cantidadClases = await cursoModel.countClasses(id);
+
+    if (cantidadClases > 0) {
+      return res.status(409).json({
+        success: false,
+        message: 'No se puede eliminar un curso con clases asociadas',
+      });
+    }
+
+    await cursoModel.remove(id);
+
+    return res.json({
+      success: true,
+      message: 'Curso eliminado correctamente',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error al eliminar el curso',
+    });
+  }
+}
+
+module.exports = { index, store, update, destroy };
