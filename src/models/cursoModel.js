@@ -116,4 +116,39 @@ async function remove(id) {
   await pool.execute('DELETE FROM cursos WHERE id = ?', [id]);
 }
 
-module.exports = { allByUser, create, findById, update, countClasses, remove };
+async function updateStudents(courseId, alumnosIds) {
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+    await connection.execute(
+      'DELETE FROM curso_alumnos WHERE curso_id = ?',
+      [courseId],
+    );
+
+    for (const alumnoId of alumnosIds) {
+      await connection.execute(
+        'INSERT INTO curso_alumnos (curso_id, alumno_id) VALUES (?, ?)',
+        [courseId, alumnoId],
+      );
+    }
+
+    await connection.commit();
+    return await findById(courseId);
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+module.exports = {
+  allByUser,
+  create,
+  findById,
+  update,
+  countClasses,
+  remove,
+  updateStudents,
+};

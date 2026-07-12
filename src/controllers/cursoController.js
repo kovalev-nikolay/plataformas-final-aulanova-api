@@ -196,4 +196,68 @@ async function destroy(req, res) {
   }
 }
 
-module.exports = { index, store, update, destroy };
+async function updateStudents(req, res) {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'El id no es válido',
+    });
+  }
+
+  const { alumnosIds } = req.body;
+
+  if (!Array.isArray(alumnosIds)) {
+    return res.status(400).json({
+      success: false,
+      message: 'La lista de alumnos no es válida',
+    });
+  }
+
+  if (alumnosIds.some((alumnoId) => !Number.isInteger(alumnoId) || alumnoId <= 0)) {
+    return res.status(400).json({
+      success: false,
+      message: 'El id de un alumno no es válido',
+    });
+  }
+
+  const alumnosIdsUnicos = [...new Set(alumnosIds)];
+
+  try {
+    const cursoExistente = await cursoModel.findById(id);
+
+    if (!cursoExistente) {
+      return res.status(404).json({
+        success: false,
+        message: 'Curso no encontrado',
+      });
+    }
+
+    for (const alumnoId of alumnosIdsUnicos) {
+      const alumno = await usuarioModel.findById(alumnoId);
+
+      if (!alumno || alumno.rol !== 'alumno' || !alumno.activo) {
+        return res.status(400).json({
+          success: false,
+          message: 'Uno o más alumnos no son válidos',
+        });
+      }
+    }
+
+    const curso = await cursoModel.updateStudents(id, alumnosIdsUnicos);
+
+    return res.json({
+      success: true,
+      message: 'Alumnos del curso actualizados correctamente',
+      curso,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error al actualizar los alumnos del curso',
+    });
+  }
+}
+
+module.exports = { index, store, update, destroy, updateStudents };
