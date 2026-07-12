@@ -89,4 +89,26 @@ async function update(id, { nombre, email, rol, activo }) {
   };
 }
 
-module.exports = { login, all, findByEmail, create, findById, update };
+async function countCoursesByProfesor(id) {
+  const [resultados] = await pool.execute(
+    'SELECT COUNT(*) AS total FROM cursos WHERE profesor_id = ?',
+    [id],
+  );
+
+  return Number(resultados[0].total);
+}
+
+async function remove(id) {
+  await pool.execute('DELETE FROM usuarios WHERE id = ?', [id]);
+}
+
+module.exports = {
+  login,
+  all,
+  findByEmail,
+  create,
+  findById,
+  update,
+  countCoursesByProfesor,
+  remove,
+};

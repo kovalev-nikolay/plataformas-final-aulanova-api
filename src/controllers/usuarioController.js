@@ -164,4 +164,56 @@ async function update(req, res) {
   }
 }
 
-module.exports = { index, store, update };
+async function destroy(req, res) {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'El id no es válido',
+    });
+  }
+
+  try {
+    const usuario = await usuarioModel.findById(id);
+
+    if (!usuario) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado',
+      });
+    }
+
+    if (id === Number(req.user.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'No podés eliminar tu propia cuenta',
+      });
+    }
+
+    if (usuario.rol === 'profesor') {
+      const cantidadCursos = await usuarioModel.countCoursesByProfesor(id);
+
+      if (cantidadCursos > 0) {
+        return res.status(409).json({
+          success: false,
+          message: 'No se puede eliminar un profesor con cursos asignados',
+        });
+      }
+    }
+
+    await usuarioModel.remove(id);
+
+    return res.json({
+      success: true,
+      message: 'Usuario eliminado correctamente',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error al eliminar el usuario',
+    });
+  }
+}
+
+module.exports = { index, store, update, destroy };
